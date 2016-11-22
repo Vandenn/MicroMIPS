@@ -1,10 +1,12 @@
 
 package Model;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
+import org.apache.commons.lang.StringUtils;
 
 public class Parser
 {
@@ -88,8 +90,8 @@ public class Parser
         StringBuilder sb = new StringBuilder();
         for (Object value : db.getInstructions().values())
         {
-            if (((String)value).isEmpty()) break;
-            sb.append((String)value);
+            if (value == null) break;
+            sb.append(generateFinalHexRepresentation(value.toString()));
             sb.append("\n");
         }
         return sb.toString();
@@ -103,5 +105,12 @@ public class Parser
     private void addError(int line, String message)
     {
         errors.add(new ErrorLogData(line, message));
+    }
+    
+    private String generateFinalHexRepresentation(String binaryCode)
+    {
+        BigInteger decimalOpcode = new BigInteger(binaryCode, 2);
+        String hexOpcode = decimalOpcode.toString(16);
+        return StringUtils.repeat("0", 8 - hexOpcode.length()) + hexOpcode;
     }
 }

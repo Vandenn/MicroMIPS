@@ -13,7 +13,7 @@ public class Database
     private static Database _instance;
     
     private Map<Integer, String> registerDB;
-    private Map<Integer, String> instructionDB;
+    private Map<Integer, Opcode> instructionDB;
     private Map<Integer, String> memoryDB;
     
     private String registerValuePattern;
@@ -31,7 +31,7 @@ public class Database
         
         registerValuePattern = "^([0-9A-Fa-f]{4} {1}){3}[0-9A-Fa-f]{4}$";
         memoryValuePattern = "^[0-9A-Fa-f]{2}$";
-        instructionValuePattern = "^[0-9A-Fa-f]{8}$";
+        instructionValuePattern = "^[01]{32}$";
     }
     
     private void initializeRegisters()
@@ -46,7 +46,7 @@ public class Database
     {
         for (int i = 0x1000; i <= 0x2FFF; i += 0x0004)
         {
-            instructionDB.put(i, "");
+            instructionDB.put(i, null);
         }
     }
     
@@ -97,7 +97,7 @@ public class Database
     {
         if (instructionDB.containsKey(key) && value.matches(instructionValuePattern))
         {
-            instructionDB.replace(key, value);
+            instructionDB.replace(key, new Opcode(value));
             return true;
         }
         return false;

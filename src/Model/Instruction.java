@@ -99,7 +99,7 @@ public enum Instruction
                 break;
         }
         
-        return generateFinalHexRepresentation(sb.toString());
+        return sb.toString();
     }
     
     private String generateBNEOpcode(int codeLine, String code, HashMap<String, Integer> labels)
@@ -130,7 +130,7 @@ public enum Instruction
         sb.append(generateBinaryRepresentation(secondRegister, 5));
         sb.append(generateBinaryRepresentation(immediate, 16));
         
-        return generateFinalHexRepresentation(sb.toString());
+        return sb.toString();
     }
     
     private String generateLoadStoreOpcode(int codeLine, String code, HashMap<String, Integer> labels)
@@ -150,7 +150,7 @@ public enum Instruction
         sb.append(generateBinaryRepresentation(destinationRegister, 5));
         sb.append(generateBinaryRepresentation(offset, 16));
         
-        return generateFinalHexRepresentation(sb.toString());
+        return sb.toString();
     }
     
     private String generateDADDIUOpcode(int codeLine, String code, HashMap<String, Integer> labels)
@@ -170,7 +170,7 @@ public enum Instruction
         sb.append(generateBinaryRepresentation(firstRegister, 5));
         sb.append(generateBinaryRepresentation(immediate, 16));
         
-        return generateFinalHexRepresentation(sb.toString());
+        return sb.toString();
     }
     
     private String generateJOpcode(int codeLine, String code, HashMap<String, Integer> labels)
@@ -186,7 +186,7 @@ public enum Instruction
         sb.append("000010");
         sb.append(generateBinaryRepresentation(index, 26));
         
-        return generateFinalHexRepresentation(sb.toString());
+        return sb.toString();
     }
     
     private String getDataPart(String code)
@@ -200,12 +200,5 @@ public enum Instruction
     {
         String raw = Integer.toBinaryString(number);
         return StringUtils.repeat("0", digits - raw.length()) + raw;
-    }
-    
-    private String generateFinalHexRepresentation(String binaryCode)
-    {
-        BigInteger decimalOpcode = new BigInteger(binaryCode, 2);
-        String hexOpcode = decimalOpcode.toString(16);
-        return StringUtils.repeat("0", 8 - hexOpcode.length()) + hexOpcode;
     }
 }
