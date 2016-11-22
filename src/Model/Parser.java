@@ -38,6 +38,11 @@ public class Parser
                 if (curr.matches(labelRegex))
                 {
                     label = curr.substring(0, curr.indexOf(':'));
+                    if (labels.containsKey(label))
+                    {
+                        addError((counter - 0x1000) / 0x0004 + 1, "Duplicate label!");
+                        return false;
+                    }
                     labels.put(label, counter);
                     curr = curr.substring(Math.min(curr.indexOf(':') + 1, curr.length() - 1)).trim();
                 }
@@ -51,8 +56,7 @@ public class Parser
             currOpcode = generateOpcode(codeLine.getKey(), codeLine.getValue(), labels);
             if (currOpcode.isEmpty())
             {
-                addError((codeLine.getKey() - 0x1000) / 0x0004 + 1, "Syntax error!");
-                
+                addError((codeLine.getKey() - 0x1000) / 0x0004 + 1, "Syntax error!"); 
             }
             else
             {
