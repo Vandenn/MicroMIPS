@@ -18,8 +18,7 @@ public class Database
     
     private String registerValuePattern;
     private String memoryValuePattern;
-    
-    private int instructionAddPointer;
+    private String instructionValuePattern;
     
     private Database() 
     {
@@ -30,9 +29,9 @@ public class Database
         initializeInstructions();
         initializeMemory();
         
-        registerValuePattern = "^([0-9A-F]{4} {1}){3}[0-9A-F]{4}$";
-        memoryValuePattern = "^[0-9A-F]{2}$";
-        instructionAddPointer = 0x1000;
+        registerValuePattern = "^([0-9A-Fa-f]{4} {1}){3}[0-9A-Fa-f]{4}$";
+        memoryValuePattern = "^[0-9A-Fa-f]{2}$";
+        instructionValuePattern = "^[0-9A-Fa-f]{8}$";
     }
     
     private void initializeRegisters()
@@ -69,6 +68,11 @@ public class Database
         return memoryDB;
     }
     
+    public Map getInstructions()
+    {
+        return instructionDB;
+    }
+    
     public Boolean editRegister(int key, String value)
     {
         if (registerDB.containsKey(key) && value.matches(registerValuePattern))
@@ -89,12 +93,19 @@ public class Database
         return false;
     }
     
-    public Boolean addInstruction(String instruction)
+    public Boolean addInstruction(int key, String value)
     {
-        if (instructionAddPointer >= 0x2FFF) return false;
-        instructionDB.put(instructionAddPointer, instruction);
-        instructionAddPointer += 0x0004;
-        return true;
+        if (instructionDB.containsKey(key) && value.matches(instructionValuePattern))
+        {
+            instructionDB.replace(key, value);
+            return true;
+        }
+        return false;
+    }
+    
+    public void clearInstructions()
+    {
+        initializeInstructions();
     }
     
     public static Database getInstance()

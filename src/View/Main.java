@@ -3,10 +3,10 @@ package View;
 
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
-import java.util.ArrayList;
 import javax.swing.KeyStroke;
 import lib.TextLineNumber;
-import Model.ErrorLogData;
+import Model.Parser;
+import Model.Processor;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -16,12 +16,17 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 public class Main extends javax.swing.JFrame {
 
     private final JFileChooser fc = new JFileChooser();
+    private Boolean started;
+    private Processor processor;
     
     /**
      * Creates new form Main
      */
     public Main() {
         initComponents();
+        
+        started = false;
+        processor = null;
         
         TextLineNumber codeAreaTLN = new TextLineNumber(codeArea);
         codeAreaScrollPane.setRowHeaderView(codeAreaTLN);
@@ -240,15 +245,15 @@ public class Main extends javax.swing.JFrame {
     }//GEN-LAST:event_editMemoryMenuItemActionPerformed
 
     private void runSingleMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_runSingleMenuItemActionPerformed
-        System.out.println("Run single!");
-        ArrayList<ErrorLogData> errors = new ArrayList<>();
-        errors.add(new ErrorLogData(1, "No code found."));
-        ErrorLog el = new ErrorLog(errors);
-        el.setVisible(true);
+        if (!started) startRun();
+        singleStep();
     }//GEN-LAST:event_runSingleMenuItemActionPerformed
 
     private void runFullMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_runFullMenuItemActionPerformed
-        System.out.println("Run full!");
+        if (!started) startRun();
+        setUIEnabled(false);
+        singleStep(); //Insert multiple single step code here.
+        setUIEnabled(true);
     }//GEN-LAST:event_runFullMenuItemActionPerformed
 
     private void aboutThisProjectMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_aboutThisProjectMenuItemActionPerformed
@@ -257,7 +262,11 @@ public class Main extends javax.swing.JFrame {
     }//GEN-LAST:event_aboutThisProjectMenuItemActionPerformed
 
     private void resetMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resetMenuItemActionPerformed
-        System.out.println("Reset!");
+        opcodeArea.setText("");
+        internalRegTextArea.setText("");
+        pipelineTextArea.setText("");
+        processor = null;
+        started = false;
     }//GEN-LAST:event_resetMenuItemActionPerformed
 
     private void loadCodeMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loadCodeMenuItemActionPerformed
@@ -316,6 +325,53 @@ public class Main extends javax.swing.JFrame {
                 new Main().setVisible(true);
             }
         });
+    }
+    
+    private void startRun()
+    {
+        Parser p = new Parser();
+        if(p.parseCode(codeArea.getText()))
+        {
+            opcodeArea.setText(p.getOpcodeText());
+            started = true;
+            processor = new Processor(p.getOpcodeText());
+        }
+        else
+        {
+            ErrorLog el = new ErrorLog(p.getErrors());
+            el.setVisible(true);
+        }
+    }
+    
+    private void singleStep()
+    {
+        if (!started) return;
+        processor.singleStep();
+    }
+    
+    private void printInternalRegisters()
+    {
+        
+    }
+    
+    private void printPipeline()
+    {
+        
+    }
+    
+    private void setUIEnabled(Boolean enabled)
+    {
+        fileMenu.setEnabled(enabled);
+        editMenu.setEnabled(enabled);
+        runMenu.setEnabled(enabled);
+        aboutMenu.setEnabled(enabled);
+        codeArea.setEnabled(enabled);
+        runSingleMenuItem.setEnabled(enabled);
+        runFullMenuItem.setEnabled(enabled);
+        resetMenuItem.setEnabled(enabled);
+        loadCodeMenuItem.setEnabled(enabled);
+        editRegistersMenuItem.setEnabled(enabled);
+        editMemoryMenuItem.setEnabled(enabled);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
