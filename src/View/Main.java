@@ -1,6 +1,7 @@
 
 package View;
 
+import Model.ErrorLogData;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import javax.swing.KeyStroke;
@@ -11,12 +12,15 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import javax.swing.JFileChooser;
+import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.text.DefaultCaret;
 
 public class Main extends javax.swing.JFrame {
 
     private final JFileChooser fc = new JFileChooser();
     private Processor processor;
+    private Boolean finished;
     
     /**
      * Creates new form Main
@@ -25,6 +29,7 @@ public class Main extends javax.swing.JFrame {
         initComponents();
         
         processor = null;
+        finished = false;
         
         TextLineNumber codeAreaTLN = new TextLineNumber(codeArea);
         codeAreaScrollPane.setRowHeaderView(codeAreaTLN);
@@ -39,6 +44,11 @@ public class Main extends javax.swing.JFrame {
         resetMenuItem.setAccelerator(ctrlR);
         KeyStroke ctrlO = KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK);
         loadCodeMenuItem.setAccelerator(ctrlO);
+        
+        DefaultCaret internalRegCaret = (DefaultCaret)internalRegTextArea.getCaret();
+        internalRegCaret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
+        DefaultCaret opcodeCaret = (DefaultCaret)opcodeArea.getCaret();
+        opcodeCaret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
         
         FileNameExtensionFilter filter = new FileNameExtensionFilter("MIPS64 Files", "txt", "asm");
         fc.setFileFilter(filter);
@@ -98,12 +108,14 @@ public class Main extends javax.swing.JFrame {
 
         internalRegLabel.setText("Internal MIPS64 Registers");
 
+        internalRegTextArea.setEditable(false);
         internalRegTextArea.setColumns(20);
         internalRegTextArea.setRows(5);
         internalRegScrollPane.setViewportView(internalRegTextArea);
 
         pipelineLabel.setText("Pipeline");
 
+        pipelineTextArea.setEditable(false);
         pipelineTextArea.setColumns(20);
         pipelineTextArea.setRows(5);
         pipelineScrollPane.setViewportView(pipelineTextArea);
@@ -243,15 +255,43 @@ public class Main extends javax.swing.JFrame {
     }//GEN-LAST:event_editMemoryMenuItemActionPerformed
 
     private void runSingleMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_runSingleMenuItemActionPerformed
+        if (finished) return;
         if (processor == null) startRun();
         singleStep();
+        updateUIAfterSingleStep();
     }//GEN-LAST:event_runSingleMenuItemActionPerformed
 
     private void runFullMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_runFullMenuItemActionPerformed
+        if (finished) return;
         if (processor == null) startRun();
-        setUIEnabled(false);
-        singleStep(); //Insert multiple single step code here.
-        setUIEnabled(true);
+        try
+        {
+            Thread runMultiple = new Thread((new Runnable(){
+                @Override
+                public void run(){
+                    setUIEnabled(false);
+                    while(singleStep()){
+                        SwingUtilities.invokeLater(new Runnable(){
+                            @Override
+                            public void run(){
+                                updateUIAfterSingleStep();
+                            }
+                        });
+                        try { Thread.sleep(200); }
+                        catch(Exception e) {}
+                    }
+                    setUIEnabled(true);
+                }
+            }));
+            runMultiple.start();
+        }
+        catch (Exception e)
+        {
+            ErrorLog el = new ErrorLog(new ErrorLogData(-1, "Unhandled Thread Exception!"));
+            el.setVisible(true);
+            finished = true;
+            processor = null;
+        }
     }//GEN-LAST:event_runFullMenuItemActionPerformed
 
     private void aboutThisProjectMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_aboutThisProjectMenuItemActionPerformed
@@ -260,10 +300,7 @@ public class Main extends javax.swing.JFrame {
     }//GEN-LAST:event_aboutThisProjectMenuItemActionPerformed
 
     private void resetMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resetMenuItemActionPerformed
-        opcodeArea.setText("");
-        internalRegTextArea.setText("");
-        pipelineTextArea.setText("");
-        processor = null;
+        reset();
     }//GEN-LAST:event_resetMenuItemActionPerformed
 
     private void loadCodeMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loadCodeMenuItemActionPerformed
@@ -339,10 +376,16 @@ public class Main extends javax.swing.JFrame {
         }
     }
     
-    private void singleStep()
+    private Boolean singleStep()
+    {
+        if (processor == null || !processor.singleStep()) return false;
+        return true;
+    }
+    
+    private void updateUIAfterSingleStep()
     {
         if (processor == null) return;
-        processor.singleStep();
+        internalRegTextArea.setText(processor.getInternalRegisters().printRegisters());
     }
     
     private void printInternalRegisters()
@@ -353,6 +396,15 @@ public class Main extends javax.swing.JFrame {
     private void printPipeline()
     {
         
+    }
+    
+    private void reset()
+    {
+        opcodeArea.setText("");
+        internalRegTextArea.setText("");
+        pipelineTextArea.setText("");
+        processor = null;
+        finished = false;
     }
     
     private void setUIEnabled(Boolean enabled)

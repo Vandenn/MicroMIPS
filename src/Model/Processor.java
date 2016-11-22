@@ -1,6 +1,8 @@
 
 package Model;
 
+import java.util.Map;
+
 public class Processor
 {
     private InternalRegisters irs;
@@ -9,12 +11,27 @@ public class Processor
     public Processor()
     {
         irs = new InternalRegisters();
-        irs.setPC("0000 0000 0000 1000");
+        irs.setPC(0x1000);
         db = Database.getInstance();
     }
     
     public Boolean singleStep()
     {
-        return false;
+        Map<Integer, Opcode> instructions = db.getInstructions();
+        irs.setPC(irs.getPC() + 0x0004);
+        if (instructions.containsKey((int)irs.getPC()) && instructions.get((int)irs.getPC()) != null)
+        {
+            irs.setIfid_IR(Converter.hexToInt(instructions.get((int)irs.getPC()).getHex()));
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    
+    public InternalRegisters getInternalRegisters()
+    {
+        return irs;
     }
 }

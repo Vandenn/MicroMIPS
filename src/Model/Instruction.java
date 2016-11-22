@@ -1,7 +1,6 @@
 
 package Model;
 
-import java.math.BigInteger;
 import java.util.HashMap;
 import org.apache.commons.lang.StringUtils;
 
@@ -49,7 +48,7 @@ public enum Instruction
                 opcode = generateROpcode(code);
                 break;
             case NOP:
-                opcode = "00000000";
+                opcode = "00000000000000000000000000000000";
                 break;
             case BNE:
                 opcode = generateBNEOpcode(codeLine, code, labels);
@@ -82,9 +81,9 @@ public enum Instruction
         StringBuilder sb = new StringBuilder();
         
         sb.append("000000");
-        sb.append(generateBinaryRepresentation(secondRegister, 5));
-        sb.append(generateBinaryRepresentation(thirdRegister, 5));
-        sb.append(generateBinaryRepresentation(firstRegister, 5));
+        sb.append(Converter.intToBinary(secondRegister, 5));
+        sb.append(Converter.intToBinary(thirdRegister, 5));
+        sb.append(Converter.intToBinary(firstRegister, 5));
         sb.append("00000");
         switch (this)
         {
@@ -126,9 +125,9 @@ public enum Instruction
         StringBuilder sb = new StringBuilder();
         
         sb.append("000101");
-        sb.append(generateBinaryRepresentation(firstRegister, 5));
-        sb.append(generateBinaryRepresentation(secondRegister, 5));
-        sb.append(generateBinaryRepresentation(immediate, 16));
+        sb.append(Converter.intToBinary(firstRegister, 5));
+        sb.append(Converter.intToBinary(secondRegister, 5));
+        sb.append(Converter.intToBinary(immediate, 16));
         
         return sb.toString();
     }
@@ -146,9 +145,9 @@ public enum Instruction
         StringBuilder sb = new StringBuilder();
         
         sb.append(this == Instruction.LD ? "110111" : "111111");
-        sb.append(generateBinaryRepresentation(baseRegister, 5));
-        sb.append(generateBinaryRepresentation(destinationRegister, 5));
-        sb.append(generateBinaryRepresentation(offset, 16));
+        sb.append(Converter.intToBinary(baseRegister, 5));
+        sb.append(Converter.intToBinary(destinationRegister, 5));
+        sb.append(Converter.intToBinary(offset, 16));
         
         return sb.toString();
     }
@@ -166,9 +165,9 @@ public enum Instruction
         StringBuilder sb = new StringBuilder();
         
         sb.append("011001");
-        sb.append(generateBinaryRepresentation(secondRegister, 5));
-        sb.append(generateBinaryRepresentation(firstRegister, 5));
-        sb.append(generateBinaryRepresentation(immediate, 16));
+        sb.append(Converter.intToBinary(secondRegister, 5));
+        sb.append(Converter.intToBinary(firstRegister, 5));
+        sb.append(Converter.intToBinary(immediate, 16));
         
         return sb.toString();
     }
@@ -184,21 +183,14 @@ public enum Instruction
         StringBuilder sb = new StringBuilder();
         
         sb.append("000010");
-        sb.append(generateBinaryRepresentation(index, 26));
+        sb.append(Converter.intToBinary(index, 26));
         
         return sb.toString();
     }
     
     private String getDataPart(String code)
     {
-        System.out.println(code);
         String registersString = code.split(" ",2)[1];
         return registersString.replaceAll("\\s+","");
-    }
-    
-    private String generateBinaryRepresentation(int number, int digits)
-    {
-        String raw = Integer.toBinaryString(number);
-        return StringUtils.repeat("0", digits - raw.length()) + raw;
     }
 }

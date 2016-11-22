@@ -7,14 +7,18 @@ import java.util.TreeMap;
 
 public class Database 
 {
-    public static final String DEFAULT_REGISTER_VALUE = "0000 0000 0000 0000";
-    public static final String DEFAULT_MEMORY_VALUE = "00";
+    public static final Long DEFAULT_REGISTER_VALUE = 0L;
+    public static final Long MINIMUM_REGISTER_VALUE = 0x8000000000000000L;
+    public static final Long MAXIMUM_REGISTER_VALUE = 0x7FFFFFFFFFFFFFFFL;
+    public static final Byte DEFAULT_MEMORY_VALUE = 0;
+    public static final Byte MINIMUM_MEMORY_VALUE = (byte) 0x80;
+    public static final Byte MAXIMUM_MEMORY_VALUE = 0x7F;
     
     private static Database _instance;
     
-    private Map<Integer, String> registerDB;
+    private Map<Integer, Long> registerDB;
     private Map<Integer, Opcode> instructionDB;
-    private Map<Integer, String> memoryDB;
+    private Map<Integer, Byte> memoryDB;
     
     private String registerValuePattern;
     private String memoryValuePattern;
@@ -28,9 +32,7 @@ public class Database
         initializeRegisters();
         initializeInstructions();
         initializeMemory();
-        
-        registerValuePattern = "^([0-9A-Fa-f]{4} {1}){3}[0-9A-Fa-f]{4}$";
-        memoryValuePattern = "^[0-9A-Fa-f]{2}$";
+
         instructionValuePattern = "^[01]{32}$";
     }
     
@@ -73,9 +75,9 @@ public class Database
         return instructionDB;
     }
     
-    public Boolean editRegister(int key, String value)
+    public Boolean editRegister(int key, long value)
     {
-        if (registerDB.containsKey(key) && value.matches(registerValuePattern))
+        if (registerDB.containsKey(key) && value >= MINIMUM_REGISTER_VALUE && value <= MAXIMUM_REGISTER_VALUE)
         {
             registerDB.replace(key, value);
             return true;
@@ -83,9 +85,9 @@ public class Database
         return false;
     }
     
-    public Boolean editMemory(int key, String value)
+    public Boolean editMemory(int key, byte value)
     {
-        if (memoryDB.containsKey(key) && value.matches(memoryValuePattern))
+        if (memoryDB.containsKey(key) && value >= MINIMUM_REGISTER_VALUE && value <= MAXIMUM_MEMORY_VALUE)
         {
             memoryDB.replace(key, value);
             return true;

@@ -35,4 +35,9 @@ public class Opcode
     {
         return IR0_5 + IR6_10 + IR11_15 + IR16_31;
     }
+    
+    public String getHex()
+    {
+        return Converter.binaryToHex(toString(), 8);
+    }
 }

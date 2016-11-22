@@ -7,6 +7,7 @@ package View;
 
 import java.util.ArrayList;
 import Model.ErrorLogData;
+import java.util.Arrays;
 
 /**
  *
@@ -30,6 +31,11 @@ public class ErrorLog extends javax.swing.JFrame {
             sb.append("\n");
         }
         errorTextArea.setText(sb.toString());
+    }
+    
+    public ErrorLog(ErrorLogData error)
+    {
+        this(new ArrayList<>(Arrays.asList(error)));
     }
 
     /**

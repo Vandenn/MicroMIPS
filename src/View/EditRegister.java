@@ -1,8 +1,8 @@
 
 package View;
 
+import Model.Converter;
 import Model.Database;
-import java.util.HashMap;
 import java.util.Map;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
@@ -89,17 +89,22 @@ public class EditRegister extends javax.swing.JFrame {
     
     private void initializeRegisterTable()
     {
-        Map<Integer, String> registers = db.getRegisters();
+        Map<Integer, Long> registers = db.getRegisters();
         DefaultTableModel registerTableModel = (DefaultTableModel)registerTable.getModel();
         
         registerTableModel.setRowCount(0);
         
         int i = 0;
         Object[] data = new Object[2];
-        for (Map.Entry<Integer, String> entry : registers.entrySet())
+        for (Map.Entry<Integer, Long> entry : registers.entrySet())
         {
             data[0] = entry.getKey();
-            data[1] = entry.getValue();
+            String value = Converter.longToHex(entry.getValue(), 16);
+            value = value.substring(0, 4) + " " + 
+                        value.substring(4, 8) + " " +
+                        value.substring(8, 12) + " " + 
+                        value.substring(12, 16);
+            data[1] = value;
             registerTableModel.addRow(data);
             i++;
         } 
@@ -107,15 +112,34 @@ public class EditRegister extends javax.swing.JFrame {
         registerTableModel.addTableModelListener(new TableModelListener(){
             public void tableChanged(TableModelEvent e)
             {
+                String registerValuePattern = "^([0-9A-Fa-f]{4} {1}){3}[0-9A-Fa-f]{4}$";
+                
                 int row = e.getFirstRow();
                 int col = e.getColumn();
                 
                 String value = (String)registerTableModel.getValueAt(row, col);
                 int register = (int)registerTableModel.getValueAt(row, 0);
-                if (!db.editRegister(register, value))
+                Boolean success = false;
+                if (value.matches(registerValuePattern))
+                {
+                    value = value.replaceAll("\\s","");
+                    long registerValue = Converter.hexToLong(value);
+                    success = db.editRegister(register, registerValue);
+                }
+                
+                if (!success)
                 {
                     Map registers = db.getRegisters();
-                    String recoveryValue = registers.containsKey(register) ? (String)registers.get(register) : Database.DEFAULT_REGISTER_VALUE;
+                    String recoveryValue = Long.toString(Database.DEFAULT_REGISTER_VALUE);
+                    if(registers.containsKey(register))
+                    {
+                        recoveryValue = Converter.longToHex((long)registers.get(register), 16);
+                        recoveryValue = recoveryValue.substring(0, 4) + " " + 
+                                recoveryValue.substring(4, 8) + " " +
+                                recoveryValue.substring(8, 12) + " " + 
+                                recoveryValue.substring(12, 16);
+                    }
+
                     registerTableModel.setValueAt(recoveryValue, row, col);
                 }
             }

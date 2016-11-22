@@ -5,6 +5,7 @@
  */
 package View;
 
+import Model.Converter;
 import Model.Database;
 import java.awt.Rectangle;
 import java.util.Map;
@@ -132,33 +133,47 @@ public class EditMemory extends javax.swing.JFrame {
     
     private void initializeMemoryTable()
     {
-        Map<Integer, String> memory = db.getMemory();
+        Map<Integer, Byte> memory = db.getMemory();
         DefaultTableModel memoryTableModel = (DefaultTableModel)memoryTable.getModel();
         
         memoryTableModel.setRowCount(0);
         
         int i = 0;
         Object[] data = new Object[2];
-        for (Map.Entry<Integer, String> entry : memory.entrySet())
+        for (Map.Entry<Integer, Byte> entry : memory.entrySet())
         {
             data[0] = Integer.toHexString(entry.getKey());
-            data[1] = entry.getValue();
+            data[1] = Converter.byteToHex(entry.getValue(), 2);
             memoryTableModel.addRow(data);
             i++;
         } 
         
         memoryTableModel.addTableModelListener(new TableModelListener(){
             public void tableChanged(TableModelEvent e)
-            {
+            {  
+                String memoryValuePattern = "^[0-9A-Fa-f]{2}$";
+                
                 int row = e.getFirstRow();
                 int col = e.getColumn();
                 
                 String value = (String)memoryTableModel.getValueAt(row, col);
-                int memoryLocation = Integer.parseInt((String)memoryTableModel.getValueAt(row, 0), 16);
-                if (!db.editMemory(memoryLocation, value))
+                int memoryLocation = Converter.hexToInt((String)memoryTableModel.getValueAt(row, 0));
+                Boolean success = false;
+                if (value.matches(memoryValuePattern))
+                {
+                    value = value.replaceAll("\\s","");
+                    byte memoryValue = Converter.hexToByte(value);
+                    success = db.editMemory(memoryLocation, memoryValue);
+                }
+                
+                if (!success)
                 {
                     Map memory = db.getMemory();
-                    String recoveryValue = memory.containsKey(memoryLocation) ? (String)memory.get(memoryLocation) : Database.DEFAULT_MEMORY_VALUE;
+                    String recoveryValue = Integer.toString(Database.DEFAULT_MEMORY_VALUE);
+                    if(memory.containsKey(memoryLocation)) 
+                    {
+                        recoveryValue = Converter.byteToHex((byte)memory.get(memoryLocation), 2);
+                    }
                     memoryTableModel.setValueAt(recoveryValue, row, col);
                 }
             }
