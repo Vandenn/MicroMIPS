@@ -18,10 +18,10 @@ public class Processor
     public Boolean singleStep()
     {
         Map<Integer, Opcode> instructions = db.getInstructions();
-        irs.setPC(irs.getPC() + 0x0004);
         if (instructions.containsKey((int)irs.getPC()) && instructions.get((int)irs.getPC()) != null)
         {
             irs.setIfid_IR(Converter.hexToInt(instructions.get((int)irs.getPC()).getHex()));
+            irs.setPC(irs.getPC() + 0x0004);
             return true;
         }
         else
