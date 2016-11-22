@@ -3,11 +3,14 @@ package Model;
 
 public class Processor
 {
-    private String opcode;
+    private InternalRegisters irs;
+    private Database db;
     
-    public Processor(String opcode)
+    public Processor()
     {
-        this.opcode = opcode;
+        irs = new InternalRegisters();
+        irs.setPC("0000 0000 0000 1000");
+        db = Database.getInstance();
     }
     
     public Boolean singleStep()

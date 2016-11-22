@@ -16,7 +16,6 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 public class Main extends javax.swing.JFrame {
 
     private final JFileChooser fc = new JFileChooser();
-    private Boolean started;
     private Processor processor;
     
     /**
@@ -25,7 +24,6 @@ public class Main extends javax.swing.JFrame {
     public Main() {
         initComponents();
         
-        started = false;
         processor = null;
         
         TextLineNumber codeAreaTLN = new TextLineNumber(codeArea);
@@ -245,12 +243,12 @@ public class Main extends javax.swing.JFrame {
     }//GEN-LAST:event_editMemoryMenuItemActionPerformed
 
     private void runSingleMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_runSingleMenuItemActionPerformed
-        if (!started) startRun();
+        if (processor == null) startRun();
         singleStep();
     }//GEN-LAST:event_runSingleMenuItemActionPerformed
 
     private void runFullMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_runFullMenuItemActionPerformed
-        if (!started) startRun();
+        if (processor == null) startRun();
         setUIEnabled(false);
         singleStep(); //Insert multiple single step code here.
         setUIEnabled(true);
@@ -266,7 +264,6 @@ public class Main extends javax.swing.JFrame {
         internalRegTextArea.setText("");
         pipelineTextArea.setText("");
         processor = null;
-        started = false;
     }//GEN-LAST:event_resetMenuItemActionPerformed
 
     private void loadCodeMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loadCodeMenuItemActionPerformed
@@ -333,8 +330,7 @@ public class Main extends javax.swing.JFrame {
         if(p.parseCode(codeArea.getText()))
         {
             opcodeArea.setText(p.getOpcodeText());
-            started = true;
-            processor = new Processor(p.getOpcodeText());
+            processor = new Processor();
         }
         else
         {
@@ -345,7 +341,7 @@ public class Main extends javax.swing.JFrame {
     
     private void singleStep()
     {
-        if (!started) return;
+        if (processor == null) return;
         processor.singleStep();
     }
     
