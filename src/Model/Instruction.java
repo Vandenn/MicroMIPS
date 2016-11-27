@@ -7,7 +7,7 @@ import org.apache.commons.lang.StringUtils;
 public enum Instruction
 {
     OR("^or r[0-9]{1,2},[ ]{0,1}r[0-9]{1,2},[ ]{0,1}r[0-9]{1,2}$"), 
-    DSUB("^dsub r[0-9]{1,2},[ ]{0,1}r[0-9]{1,2},[ ]{0,1}r[0-9]{1,2}$"), 
+    DSUBU("^dsubu r[0-9]{1,2},[ ]{0,1}r[0-9]{1,2},[ ]{0,1}r[0-9]{1,2}$"), 
     SLT("^slt r[0-9]{1,2},[ ]{0,1}r[0-9]{1,2},[ ]{0,1}r[0-9]{1,2}$"), 
     NOP("^nop$"),
     BNE("^bne r[0-9]{1,2},[ ]{0,1}r[0-9]{1,2},[ ]{0,1}(0x[0-9a-f]{4}|[a-z0-9_]+)$"),
@@ -25,7 +25,7 @@ public enum Instruction
         switch(this)
         {
             case OR: return "or";
-            case DSUB: return "dsub";
+            case DSUBU: return "dsubu";
             case SLT: return "slt";
             case NOP: return "nop";
             case BNE: return "bne";
@@ -43,7 +43,7 @@ public enum Instruction
         switch(this)
         {
             case OR:
-            case DSUB:
+            case DSUBU:
             case SLT:
                 opcode = generateROpcode(code);
                 break;
@@ -90,7 +90,7 @@ public enum Instruction
             case OR:
                 sb.append("100101");
                 break;
-            case DSUB:
+            case DSUBU:
                 sb.append("101111");
                 break;
             case SLT:
