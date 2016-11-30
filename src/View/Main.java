@@ -385,12 +385,13 @@ public class Main extends javax.swing.JFrame {
     private void updateUIAfterSingleStep()
     {
         if (processor == null) return;
-        internalRegTextArea.setText(processor.getInternalRegisters().printRegisters());
+        printInternalRegisters();
+        printPipeline();
     }
     
     private void printInternalRegisters()
     {
-        
+        internalRegTextArea.setText(processor.getInternalRegisters().printRegisters());
     }
     
     private void printPipeline()
