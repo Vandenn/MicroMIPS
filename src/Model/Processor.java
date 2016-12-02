@@ -20,8 +20,9 @@ public class Processor
         Map<Integer, Opcode> instructions = db.getInstructions();
         if (instructions.containsKey((int)irs.getPC()) && instructions.get((int)irs.getPC()) != null)
         {
-            irs.setIfid_IR(Converter.hexToInt(instructions.get((int)irs.getPC()).getHex()));
+            irs.setIfid_IR(instructions.get((int)irs.getPC()));
             irs.setPC(irs.getPC() + 0x0004);
+            irs.setIfid_NPC(irs.getPC());
             return true;
         }
         else

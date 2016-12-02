@@ -14,6 +14,7 @@ import java.io.FileReader;
 import javax.swing.JFileChooser;
 import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.text.DefaultCaret;
 
 public class Main extends javax.swing.JFrame {
@@ -74,7 +75,7 @@ public class Main extends javax.swing.JFrame {
         internalRegTextArea = new javax.swing.JTextArea();
         pipelineLabel = new javax.swing.JLabel();
         pipelineScrollPane = new javax.swing.JScrollPane();
-        pipelineTextArea = new javax.swing.JTextArea();
+        pipelineTable = new javax.swing.JTable();
         mainMenuBar = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
         loadCodeMenuItem = new javax.swing.JMenuItem();
@@ -115,10 +116,34 @@ public class Main extends javax.swing.JFrame {
 
         pipelineLabel.setText("Pipeline");
 
-        pipelineTextArea.setEditable(false);
-        pipelineTextArea.setColumns(20);
-        pipelineTextArea.setRows(5);
-        pipelineScrollPane.setViewportView(pipelineTextArea);
+        pipelineTable.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "Instruction", "1"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.String.class, java.lang.String.class
+            };
+            boolean[] canEdit = new boolean [] {
+                false, false
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        pipelineScrollPane.setViewportView(pipelineTable);
+        if (pipelineTable.getColumnModel().getColumnCount() > 0) {
+            pipelineTable.getColumnModel().getColumn(0).setResizable(false);
+            pipelineTable.getColumnModel().getColumn(1).setResizable(false);
+        }
 
         fileMenu.setText("File");
 
@@ -231,14 +256,14 @@ public class Main extends javax.swing.JFrame {
                     .addComponent(opcodeAreaScrollPane)
                     .addComponent(codeAreaScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 259, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(internalRegLabel)
                     .addComponent(pipelineLabel))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(internalRegScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 151, Short.MAX_VALUE)
-                    .addComponent(pipelineScrollPane))
-                .addContainerGap(14, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(internalRegScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 294, Short.MAX_VALUE)
+                    .addComponent(pipelineScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         pack();
@@ -403,9 +428,16 @@ public class Main extends javax.swing.JFrame {
     {
         opcodeArea.setText("");
         internalRegTextArea.setText("");
-        pipelineTextArea.setText("");
+        resetPipeline();
         processor = null;
         finished = false;
+    }
+    
+    private void resetPipeline()
+    {
+        DefaultTableModel model = (DefaultTableModel)pipelineTable.getModel();
+        model.setRowCount(0);
+        pipelineTable.setModel(model);
     }
     
     private void setUIEnabled(Boolean enabled)
@@ -443,7 +475,7 @@ public class Main extends javax.swing.JFrame {
     private javax.swing.JLabel opcodeLabel;
     private javax.swing.JLabel pipelineLabel;
     private javax.swing.JScrollPane pipelineScrollPane;
-    private javax.swing.JTextArea pipelineTextArea;
+    private javax.swing.JTable pipelineTable;
     private javax.swing.JMenuItem resetMenuItem;
     private javax.swing.JMenuItem runFullMenuItem;
     private javax.swing.JMenu runMenu;
