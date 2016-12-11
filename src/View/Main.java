@@ -11,6 +11,7 @@ import Model.Processor;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.util.Map;
 import javax.swing.JFileChooser;
 import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -31,7 +32,7 @@ public class Main extends javax.swing.JFrame {
         
         processor = null;
         finished = false;
-        
+                
         TextLineNumber codeAreaTLN = new TextLineNumber(codeArea);
         codeAreaScrollPane.setRowHeaderView(codeAreaTLN);
         TextLineNumber opcodeAreaTLN = new TextLineNumber(opcodeArea);
@@ -282,8 +283,8 @@ public class Main extends javax.swing.JFrame {
     private void runSingleMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_runSingleMenuItemActionPerformed
         if (finished) return;
         if (processor == null) startRun();
-        singleStep();
-        updateUIAfterSingleStep();
+        //singleStep();
+        updateUIAfterSingleStep(processor.singleStep());
     }//GEN-LAST:event_runSingleMenuItemActionPerformed
 
     private void runFullMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_runFullMenuItemActionPerformed
@@ -295,11 +296,11 @@ public class Main extends javax.swing.JFrame {
                 @Override
                 public void run(){
                     setUIEnabled(false);
-                    while(singleStep()){
+                    while(!finished){
                         SwingUtilities.invokeLater(new Runnable(){
                             @Override
                             public void run(){
-                                updateUIAfterSingleStep();
+                                updateUIAfterSingleStep(processor.singleStep());
                             }
                         });
                         try { Thread.sleep(200); }
@@ -401,17 +402,17 @@ public class Main extends javax.swing.JFrame {
         }
     }
     
-    private Boolean singleStep()
+    /*private Boolean singleStep()
     {
         if (processor == null || !processor.singleStep()) return false;
         return true;
-    }
+    }*/
     
-    private void updateUIAfterSingleStep()
+    private void updateUIAfterSingleStep(Map<Integer, Integer> pipeline)
     {
         if (processor == null) return;
         printInternalRegisters();
-        printPipeline();
+        printPipeline(pipeline);
     }
     
     private void printInternalRegisters()
@@ -419,9 +420,15 @@ public class Main extends javax.swing.JFrame {
         internalRegTextArea.setText(processor.getInternalRegisters().printRegisters());
     }
     
-    private void printPipeline()
+    private void printPipeline(Map<Integer, Integer> pipeline)
     {
         
+        //to check if each instruction has reached 5
+        for(Map.Entry<Integer,Integer> entry : pipeline.entrySet())
+        {
+            if (entry.getValue() == 5) {finished = true;}
+            else { finished = false; }
+        }
     }
     
     private void reset()
