@@ -21,12 +21,59 @@ public class Processor
     public Map singleStep()
     {
         Map<Integer, Opcode> instructions = db.getInstructions();
+        String opcode0_5 = "";
+        String opcode16_31 = "";
+        String operation = "";
         
-        int value;
+        
         boolean stall = false;
+        //decoding
+        for(Map.Entry<Integer,Opcode> entry : instructions.entrySet())
+        {
+            opcode0_5 = entry.getValue().getIR0_5();
+            switch (opcode0_5)
+            {
+                case "110111": //LD
+                    operation = "ld";
+                    break;
+                case "111111": //SD
+                    operation = "sd";
+                    break;
+                case "000101": //BNE
+                    operation = "bne";
+                    break;
+                case "011001": //DADDIU
+                    operation = "daddiu";
+                    break;
+                case "000010": //J
+                    operation = "j";
+                    break;
+                case "000000": //NOP, OR, DSUBU, SLT
+                    opcode16_31 = entry.getValue().getIR16_31();
+                    switch (opcode16_31)
+                    {
+                        case "000000": //NOP
+                            operation = "nop";
+                            break;
+                        case "100101": //OR
+                            operation = "or";
+                            break;
+                        case "101111": //DSUBU
+                            operation = "dsubu";
+                            break;
+                        case "101010": //SLT
+                            operation = "slt";
+                            break;
+                    }       
+            }
+            
+            
+            
+        }
+        
         for(Map.Entry<Integer,Integer> entry : pipeline.entrySet())
         {   
-            value = entry.getValue();
+            int value = entry.getValue();
             switch (value) {
                 case 4: //WB
                     irs.setRegAff((int)irs.getMemwb_LMD());
@@ -60,10 +107,10 @@ public class Processor
             irs.setPC(irs.getPC() + 0x0004);
             irs.setIfid_NPC(irs.getPC());
         }
-        
+        stall = false;
         return pipeline;
     }
-    
+   
     public InternalRegisters getInternalRegisters()
     {
         return irs;
